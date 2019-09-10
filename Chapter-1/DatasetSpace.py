@@ -1,4 +1,5 @@
 import pandas as pd
+from tabulate import tabulate
 
 
 class DatasetSpace:
@@ -11,7 +12,8 @@ class DatasetSpace:
         :param dataset: pd.DataFrame
         """
         self.__data = dataset
-        self.__features = self.__data.columns
+        self.__features = list(self.__data.columns)
+        self.__features.remove("target")
 
     def get_hypothesis_space(self):
         """
@@ -37,10 +39,31 @@ class DatasetSpace:
         Check the hypothesis_space with the samples, which will get version_space
         :return:
         """
-        # TODO: implement of get_version_space
-        for sap in self.__data:
-            for hps in self.get_hypothesis_space():
-                return hps
+        global version_space
+        version_space = self.get_hypothesis_space()
+
+        def check(sample):
+            global version_space
+            if sample["target"]:  # positive sample
+                for i, hps in enumerate(version_space):
+                    for j, f in enumerate(self.__features):
+                        if sample[f] != hps[j] and hps[j] != "*":
+                            # hypothesis not agree with the positive sample
+                            del version_space[i]
+            else:
+                for i, hps in enumerate(version_space):
+                    for j, f in enumerate(self.__features):
+                        if sample[f] == hps[j]:
+                            # hypothesis agree with the negative sample
+                            del version_space[i]
+                    if set(hps) - set(["*"] * len(self.__features)) == set():
+                        del version_space[i]
+
+            return sample
+
+        self.__data.apply(check, axis=1)
+
+        return version_space
 
     def get_sample_space(self):
         """
@@ -53,7 +76,25 @@ class DatasetSpace:
             sample_space[f] = list(self.__data[f].unique()) + ["*"]
         return sample_space
 
-    # TODO: format and print space
+    @property
+    def hypothesis(self):
+        return tabulate(
+            pd.DataFrame(self.get_hypothesis_space(), columns=self.__features),
+            tablefmt="pipe",
+            headers="keys",
+        )
+
+    @property
+    def version(self):
+        return tabulate(
+            pd.DataFrame(self.get_version_space(), columns=self.__features),
+            tablefmt="pipe",
+            headers="keys",
+        )
+
+    @property
+    def sample(self):
+        return str(self.get_sample_space())
 
 
 class Enumerator:
@@ -93,12 +134,18 @@ class Enumerator:
 if __name__ == "__main__":
     melon_data = pd.DataFrame(
         [
-            ["青绿", "蜷缩", "浊响"],
-            ["乌黑", "蜷缩", "浊响"],
-            ["青绿", "硬挺", "清脆"],
-            ["乌黑", "稍蜷", "沉闷"],
+            ["青绿", "蜷缩", "浊响", True],
+            ["乌黑", "蜷缩", "浊响", True],
+            ["青绿", "硬挺", "清脆", False],
+            ["乌黑", "稍蜷", "沉闷", False],
         ],
-        columns=["色泽", "根蒂", "敲声"],
+        columns=["色泽", "根蒂", "敲声", "target"],
     )
+
     space = DatasetSpace(melon_data)
-    print(space.get_hypothesis_space())
+
+    print("=" * 79 + "\n样本空间: \n" + space.sample)
+
+    print("=" * 79 + "\n假设空间: \n" + space.hypothesis)
+
+    print("=" * 79 + "\n版本空间: \n" + space.version)
