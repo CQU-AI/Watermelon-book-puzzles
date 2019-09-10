@@ -1,3 +1,13 @@
+# python3
+# -*- coding: utf-8 -*-
+# @File    : DatasetSpace.py
+# @Desc    : Book 1-1
+# @Project : Melon-book-puzzles
+# @Time    : 9/10/19 3:21 PM
+# @Author  : Loopy
+# @Contact : peter@mail.loopy.tech
+# @License : CC BY-NC-SA 4.0 (subject to project license)
+
 import pandas as pd
 from tabulate import tabulate
 
@@ -100,7 +110,6 @@ class DatasetSpace:
         for f in self.__features:
             possible_values[f] = list(self.__data[f].unique())
         return possible_values
-
 
     @property
     def hypothesis(self):
