@@ -19,8 +19,10 @@ class DatasetSpace:
         """
         :return: list (list hypothesis (unknown sample_value))
         """
-        sample_space = self.get_sample_space()
-        enum = Enumerator([len(sample_space[f]) for f in self.__features])
+        possible_values = self.get_possible_values()
+        for k in possible_values.keys():
+            possible_values[k] += ["*"]
+        enum = Enumerator([len(possible_values[f]) for f in self.__features])
         hypothesis_space = []
 
         while True:
@@ -29,10 +31,28 @@ class DatasetSpace:
             if code == -1:
                 break
             for i, e in enumerate(code):
-                res[i] = sample_space[self.__features[i]][e]
+                res[i] = possible_values[self.__features[i]][e]
             hypothesis_space.append(res)
         hypothesis_space.append(["-"] * len(self.__features))
         return hypothesis_space
+
+    def get_sample_space(self):
+        """
+        :return: list (list sample (unknown sample_value))
+        """
+        possible_values = self.get_possible_values()
+        enum = Enumerator([len(possible_values[f]) for f in self.__features])
+        sample_space = []
+
+        while True:
+            res = [0] * len(self.__features)
+            code = enum.next()
+            if code == -1:
+                break
+            for i, e in enumerate(code):
+                res[i] = possible_values[self.__features[i]][e]
+            sample_space.append(res)
+        return sample_space
 
     def get_version_space(self):
         """
@@ -70,16 +90,17 @@ class DatasetSpace:
                 version_space.append(hypothesis_space[i])
         return version_space
 
-    def get_sample_space(self):
+    def get_possible_values(self):
         """
-        Get the sample space
+        Get the possible sample values
         :return: dic (key:(str feature)
                       value:(list possible_feature_values))
         """
-        sample_space = {}
+        possible_values = {}
         for f in self.__features:
-            sample_space[f] = list(self.__data[f].unique()) + ["*"]
-        return sample_space
+            possible_values[f] = list(self.__data[f].unique())
+        return possible_values
+
 
     @property
     def hypothesis(self):
@@ -99,7 +120,11 @@ class DatasetSpace:
 
     @property
     def sample(self):
-        return str(self.get_sample_space())
+        return tabulate(
+            pd.DataFrame(self.get_sample_space(), columns=self.__features),
+            tablefmt="pipe",
+            headers="keys",
+        )
 
 
 class Enumerator:
@@ -140,8 +165,8 @@ if __name__ == "__main__":
     melon_data = pd.DataFrame(
         [
             ["青绿", "蜷缩", "浊响", True],
-            #     ["乌黑", "蜷缩", "浊响", True],
-            #     ["青绿", "硬挺", "清脆", False],
+            ["乌黑", "蜷缩", "浊响", True],
+            ["青绿", "硬挺", "清脆", False],
             ["乌黑", "稍蜷", "沉闷", False],
         ],
         columns=["色泽", "根蒂", "敲声", "target"],
@@ -151,6 +176,6 @@ if __name__ == "__main__":
 
     print("=" * 79 + "\n样本空间: \n" + space.sample)
 
-    print("=" * 79 + "\n假设空间: \n" + space.hypothesis)
+    print("=" * 79 + "\n合取假设的假设空间: \n" + space.hypothesis)
 
-    print("=" * 79 + "\n版本空间: \n" + space.version)
+    print("=" * 79 + "\n合取假设的版本空间: \n" + space.version)
