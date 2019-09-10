@@ -39,30 +39,35 @@ class DatasetSpace:
         Check the hypothesis_space with the samples, which will get version_space
         :return:
         """
-        global version_space
-        version_space = self.get_hypothesis_space()
+        global hypothesis_space, is_vaild
+        hypothesis_space = self.get_hypothesis_space()
+        is_vaild = [True] * len(hypothesis_space)
 
         def check(sample):
-            global version_space
+            global hypothesis_space, is_vaild
             if sample["target"]:  # positive sample
-                for i, hps in enumerate(version_space):
+                for i, hps in enumerate(hypothesis_space):
                     for j, f in enumerate(self.__features):
                         if sample[f] != hps[j] and hps[j] != "*":
                             # hypothesis not agree with the positive sample
-                            del version_space[i]
+                            is_vaild[i] = False
+                            break
             else:
-                for i, hps in enumerate(version_space):
+                for i, hps in enumerate(hypothesis_space):
                     for j, f in enumerate(self.__features):
                         if sample[f] == hps[j]:
                             # hypothesis agree with the negative sample
-                            del version_space[i]
+                            is_vaild[i] = False
+                            break
                     if set(hps) - set(["*"] * len(self.__features)) == set():
-                        del version_space[i]
-
+                        is_vaild[i] = False
             return sample
 
         self.__data.apply(check, axis=1)
-
+        version_space = []
+        for i, flag in enumerate(is_vaild):
+            if flag:
+                version_space.append(hypothesis_space[i])
         return version_space
 
     def get_sample_space(self):
@@ -135,8 +140,8 @@ if __name__ == "__main__":
     melon_data = pd.DataFrame(
         [
             ["青绿", "蜷缩", "浊响", True],
-            ["乌黑", "蜷缩", "浊响", True],
-            ["青绿", "硬挺", "清脆", False],
+            #     ["乌黑", "蜷缩", "浊响", True],
+            #     ["青绿", "硬挺", "清脆", False],
             ["乌黑", "稍蜷", "沉闷", False],
         ],
         columns=["色泽", "根蒂", "敲声", "target"],
