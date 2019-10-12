@@ -2,7 +2,7 @@
 
 We are working on the puzzles in the Watermelon-book.
 
-**Note that we are not sharing the answers but implement of the algorithms. For example, `class KNeighborsClassifier` instead of 'runing knn on iris'**
+**Note that we are not sharing the answers but implementation of the algorithms. For example, `class KNeighborsClassifier` instead of 'runing knn on iris'**
 
 Detailed puzzle and solution list can be found in the `Puzzles.md` in each folder. Here is a brief one:
 
