@@ -48,22 +48,16 @@ class DecisionTreeRegressor:
         best_feature = None
         best_threshold = None
         best_left_ind = best_right_ind = None
-
-        # sum_all = np.sum(y)
+        
         step = lambda x, y, a: (x + a, y - a)
 
         for i in range(X.shape[1]):  # for features
-            # sum_left, sum_right = 0, sum_all
-            # n_left = 0
-            # n_right = X.shape[0]
             y_left = np.array([])
             y_right = y.copy()
             ind = np.argsort(X[:, i])
 
             for j in range(ind.shape[0] - 1):  # for all sample
                 # step by step
-                # sum_left, sum_right = step(sum_left, sum_right, y[ind[j]])
-                # n_left, n_right = step(n_left, n_right, 1)
 
                 y_left = np.append(y_left, y[ind[j]])
                 y_right[ind[j]] = 0
