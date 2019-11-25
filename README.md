@@ -13,6 +13,7 @@ Detailed puzzle and solution list can be found in the `Puzzles.md` in each folde
 |Linear Regression|Binary Linear regression based on gradient descent (l-bfgs-b) without penalty|[PY](./Chapter-03/LinearRegression.py)
 |Logistic Regression|Binary Logistic regression based on gradient descent (l-bfgs-b) without penalty|[PY](./Chapter-03/LogisticRegression.py)
 |KNN| K-Nearest Neighbors Classifier |[PY](./Chapter-10/knn.py)
+|...|More puzzles and solutions can be found in the `Puzzles.md` in each folder.|
 
 
 ## Everyone is welcomed to contribute!
